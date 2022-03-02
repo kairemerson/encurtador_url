@@ -13,15 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UrlController = void 0;
+const url_1 = require("../database/model/url");
 const shortid_1 = __importDefault(require("shortid"));
 const constants_1 = require("../config/constants");
 class UrlController {
     shorten(req, resp) {
         return __awaiter(this, void 0, void 0, function* () {
             const { originUrl } = req.body;
+            const url = yield url_1.URLModel.findOne({ originUrl });
+            if (url) {
+                resp.json(url);
+                return;
+            }
             const hash = shortid_1.default.generate();
             const shortUrl = `${constants_1.config.API_URL}/${hash}`;
-            resp.json({ originUrl, hash, shortUrl });
+            const newUrl = yield url_1.URLModel.create({ hash, shortUrl, originUrl });
+            resp.json(newUrl);
         });
     }
     redirect(req, resp) {
